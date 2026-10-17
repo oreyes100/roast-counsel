@@ -72,3 +72,11 @@ test('quick mode cannot hide earlier likely ruin; actual amendments survive chai
   assert.equal(f.s.status,'COMPLETE');assert.equal(f.s.skippedRatification,false);assert.equal(f.s.verdict.label,'RESHAPE');
   assert.equal(f.s.verdict.amendments.length,1);assert.equal(f.s.verdict.amendments[0].adopted,false);
 });
+test('all model calls include typed output contracts and closed risk enums',async t=>{
+  const f=fixture(t);const seen=[];
+  f.engine.providerFactory=()=>({call(args){seen.push(args.schema);return f.provider.call(args);}});
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'COMPLETE');assert.equal(seen.length,15);
+  for(const schema of seen)assert.equal(schema.additionalProperties,false);
+  assert.deepEqual(seen[0].properties.risks.properties.A.properties.ruin.enum,['none','possible','likely']);
+  assert(seen[0].required.includes('citations'));
+});

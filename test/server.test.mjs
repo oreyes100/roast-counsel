@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
+import {spawn} from 'node:child_process';
+import {ROOT} from './helpers.mjs';
 import {createApp} from '../server.mjs';
 import {DemoProvider,DEMO_BRIEF} from '../lib/demo.mjs';
 async function app(t,options={}) {
@@ -58,4 +60,18 @@ test('managed production config cannot be changed or leaked through the UI endpo
   const a=await app(t,{configLocked:true});
   assert(a.boot.config.locked);
   assert.equal((await a.post('/api/config',{provider:'openai',model:'test',apiKey:'new-secret'})).status,403);
+});
+test('CLI starts through a release symlink as used by systemd current',async t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'roast-cli-'));
+  const reservation=http.createServer();await new Promise(resolve=>reservation.listen(0,'127.0.0.1',resolve));
+  const port=reservation.address().port;await new Promise(resolve=>reservation.close(resolve));
+  const entry=path.join(dir,'entry.mjs');fs.symlinkSync(path.join(ROOT,'server.mjs'),entry);
+  const child=spawn(process.execPath,[entry],{env:{...process.env,PORT:String(port),ROAST_DATA_DIR:path.join(dir,'sessions')}});
+  t.after(async()=>{child.kill();await new Promise(resolve=>child.exitCode!==null?resolve():child.once('exit',resolve));fs.rmSync(dir,{recursive:true,force:true});});
+  await new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('Symlink CLI did not start')),7000);
+    child.stdout.on('data',chunk=>{if(String(chunk).includes('Roast Room:')){clearTimeout(timer);resolve();}});
+    child.once('exit',code=>{clearTimeout(timer);reject(new Error('CLI exited before listening: '+code));});
+  });
+  const r=await fetch(`http://127.0.0.1:${port}/health`);assert.equal(r.status,200);
 });

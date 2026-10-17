@@ -91,7 +91,7 @@ export function createApp({dataDir=process.env.ROAST_DATA_DIR||path.join(ROOT,'d
   server.requestTimeout=15000;server.headersTimeout=10000;
   return {server,store,engine,knowledge};
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href) {
+if(process.argv[1]&&import.meta.url===pathToFileURL(fs.realpathSync(path.resolve(process.argv[1]))).href) {
   loadEnv();
   const app=createApp(),port=Number(process.env.PORT)||4730;
   app.server.listen(port,'127.0.0.1',()=>console.log(`Roast Room: http://127.0.0.1:${port}`));

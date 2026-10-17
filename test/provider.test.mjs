@@ -36,3 +36,10 @@ test('gateway URL rejects credential-bearing URLs, insecure HTTP and paths',()=>
   const c=normalizeConfig({provider:'freellmapi',model:'auto',apiKey:'unified-secret',baseURL:'https://attacker.example'},{baseURL:'https://gateway.example'});
   assert.equal(c.baseURL,'https://gateway.example');
 });
+test('structured requests require the supplied schema instead of relying on JSON prose',async()=>{
+  const schema={type:'object',properties:{ready:{type:'boolean'}},required:['ready'],additionalProperties:false};
+  const p=new Provider({provider:'freellmapi',baseURL:'https://gateway.example',model:'auto',apiKey:'unified-secret'},{fetchFn:async(_url,init)=>{
+    const b=JSON.parse(init.body);assert.equal(b.response_format.type,'json_schema');assert.equal(b.response_format.json_schema.strict,true);assert.deepEqual(b.response_format.json_schema.schema,schema);
+    return Response.json({choices:[{message:{content:'{"ready":true}'},finish_reason:'stop'}]});
+  }});await p.call({system:'JSON',prompt:'test',maxOutputTokens:1000,schema});
+});
