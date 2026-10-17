@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173d32"><title>Roast Room · Piensa antes de apostar</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Ir al contenido</a>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Roast Room inicio"><span class="brand-mark">r<span>r</span></span><span>roast room<span class="brand-small">TU CONSEJO DE DECISIONES</span></span></a>
+    <div class="sidebar-label">WORKSPACE PERSONAL</div>
+    <button class="nav-item selected" id="new-session"><span>＋</span> Nueva decisión <span class="nav-arrow">↗</span></button>
+    <div class="history-head"><span class="sidebar-label">TUS SESIONES</span><button class="icon-btn" id="refresh-history" aria-label="Actualizar sesiones">↻</button></div>
+    <nav id="history" aria-label="Historial de decisiones"><p class="sidebar-empty">El próximo buen argumento empieza aquí.</p></nav>
+    <div class="sidebar-bottom">
+      <div class="local-note"><span class="status-dot"></span> Guardado en este equipo</div>
+      <button class="nav-item" id="settings-open"><span>⚙</span> Conexión de IA <span id="key-indicator" class="tiny-dot"></span></button>
+      <div class="profile"><span class="profile-avatar">TÚ</span><div>Tu espacio de trabajo<small>Una decisión a la vez</small></div></div>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><span id="breadcrumb-current">Nueva decisión</span></div><div class="topbar-right"><span class="private-pill"><span class="status-dot"></span> LOCAL</span><button class="text-btn" id="demo-top">Explorar un ejemplo ↗</button></div></header>
+    <main id="main">
+      <section id="brief-view">
+        <div class="intro"><div><p class="eyebrow">MENOS INTUICIÓN SOLITARIA. MÁS PERSPECTIVA.</p><h1>Las buenas decisiones<br>sobreviven al <em>debate.</em></h1><p class="intro-copy">Pon tu próxima apuesta sobre la mesa. Un consejo de IA la cuestiona<br class="desktop-break"> desde distintos ángulos y te devuelve un plan para decidir.</p></div><div class="edition">ROAST ROOM<span>DECISION LAB / 01</span></div></div>
+        <div class="view-tabs" aria-label="Etapas del consejo"><span class="tab-active"><b>01</b> Define la decisión</span><span><b>02</b> Abre el debate</span><span><b>03</b> Decide con evidencia</span></div>
+        <form id="brief-form">
+          <div class="brief-grid">
+            <div class="form-main">
+              <section class="paper-card"><div class="section-heading"><span class="section-number">01</span><div><h2>¿Qué está en juego?</h2><p>Una decisión concreta produce una conversación útil.</p></div></div>
+                <label for="decision">La decisión <span>*</span></label><input id="decision" name="decision" maxlength="500" minlength="10" required placeholder="¿Debería lanzar mi producto o validar primero con un servicio?">
+                <label for="context">Dale contexto al consejo <span>*</span></label><textarea id="context" name="context" rows="3" maxlength="5000" minlength="10" required placeholder="Qué estás construyendo, para quién, en qué etapa estás y qué sabes hasta ahora…"></textarea>
+                <div class="label-row"><label>Las opciones sobre la mesa <span>*</span></label><span>Incluye mantener el estado actual</span></div>
+                <div id="options-editor"></div><button class="text-btn add-option" id="add-option" type="button">＋ Agregar otra opción</button>
+                <label for="no-action">¿Cuál representa mantener la situación actual?</label><select id="no-action" name="noActionId"></select>
+              </section>
+              <section class="paper-card"><div class="section-heading"><span class="section-number">02</span><div><h2>Los límites hacen mejor la apuesta.</h2><p>Usa cifras reales. Escribe «desconocido» cuando falte un dato.</p></div></div>
+                <label for="resources">Presupuesto, tiempo y equipo <span>*</span></label><textarea id="resources" name="resources" rows="2" required maxlength="2000" placeholder="Ej. US$500, 40 horas y una persona durante las próximas dos semanas."></textarea>
+                <label for="success">¿Cómo sabrás que funcionó? <span>*</span></label><textarea id="success" name="success" rows="2" required maxlength="1500" placeholder="Ej. Dos pilotos pagados y cinco horas de ahorro por cliente antes del día 30."></textarea>
+                <div class="two-col"><div><label for="owner">Responsable</label><input id="owner" name="owner" value="Yo" required maxlength="100"></div><div><label for="deadline">Fecha o plazo de decisión <span>*</span></label><input id="deadline" name="deadline" required maxlength="150" placeholder="Ej. 31 de octubre"></div></div>
+                <label for="constraints">Lo que no puedes comprometer <span>*</span></label><input id="constraints" name="constraints" required maxlength="1500" placeholder="Ej. No contratar, no gastar más del límite, no usar datos sin permiso.">
+                <label for="lean">¿Hacia dónde te inclinas? <small>Opcional · se oculta en la primera ronda</small></label><input id="lean" name="lean" maxlength="1000" placeholder="Tu opción favorita y por qué te atrae.">
+              </section>
+              <section class="paper-card"><div class="section-heading"><span class="section-number">03</span><div><h2>Pon a prueba la idea.</h2><p>Elige al menos dos cambios de escenario.</p></div></div><div id="scenarios-editor" class="scenario-list"></div></section>
+            </div>
+            <aside class="council-config">
+              <div class="council-preview"><div class="preview-label"><span class="status-dot"></span> UN CONSEJO, VARIAS PERSPECTIVAS</div><div class="portrait-stack" id="portrait-stack"></div><h2>Que tu idea tenga<br>buenos oponentes.</h2><p>Voces simuladas, inspiradas en marcos públicos. Tú conservas la decisión.</p><div class="preview-rule"></div><div class="preview-stats"><span><b id="seat-count">4</b> perspectivas</span><span><b>3</b> momentos para pensar</span></div></div>
+              <div class="paper-card seats-card"><div class="card-heading"><h3>Arma tu consejo</h3><span class="muted">Peso 1–3</span></div><label class="sr-only" for="mode">Modo del consejo</label><select id="mode"><option value="named">Personalizado · elige las voces</option><option value="quick">Rápido · 4 voces, 2–3 rondas</option><option value="full">Completo · 7 voces, 3 rondas</option></select><p class="field-help">Peso 3 para uno o dos pilares decisivos.</p><div id="seats-editor"></div>
+                <details class="limits"><summary>Límites de uso de IA</summary><label for="max-calls">Máximo de llamadas</label><input id="max-calls" type="number" min="5" max="64" value="32" required><label for="max-output">Tokens máximos por respuesta</label><input id="max-output" type="number" min="1000" max="4000" value="2000" required><p class="field-help">Cada intento cuenta. El cobro depende del proveedor; estos límites no representan un presupuesto en dinero.</p></details>
+              </div>
+              <div class="quiet-note"><span>↳</span><p>Primero piensan por separado.<br>Después discuten. Al final, votan.</p></div>
+            </aside>
+          </div>
+          <div class="launch-bar"><div><span class="status-dot" id="launch-dot"></span><span id="launch-hint">Conecta tu IA para abrir el consejo.</span><small id="call-estimate">Hasta 15 llamadas sin reintentos</small></div><button class="primary-btn" type="submit" id="launch-btn">Abrir el consejo <span>↗</span></button></div>
+        </form>
+        <div class="source-footer">Basado en Roast Room de AI Automation Society <span>·</span> <a href="/upstream-license" target="_blank" rel="noopener">Licencia y atribución</a></div>
+      </section>
+      <section id="session-view" hidden>
+        <div class="session-heading"><div><p class="eyebrow" id="session-kicker">CONSEJO EN CURSO</p><h1 id="session-title"></h1><p class="muted" id="session-meta"></p></div><div class="session-actions"><button class="secondary-btn" id="stop-session">Detener</button><button class="primary-btn" id="resume-session" hidden>Reanudar ↗</button></div></div>
+        <div class="demo-banner" id="demo-banner" hidden>DEMO PRECALCULADA · Este ejemplo ilustra el flujo. No se consultó a una IA.</div>
+        <div class="error-banner" id="session-error" role="alert" hidden></div>
+        <ol class="progress-steps" id="progress-steps" aria-label="Progreso del consejo"></ol>
+        <div class="session-toolbar"><h2 id="round-heading">El consejo está pensando…</h2><div id="round-tabs" class="round-tabs"></div></div>
+        <div class="advisor-grid" id="advisor-grid"></div>
+        <div class="debate-grid"><section class="paper-card" id="crux-card"><p class="eyebrow">DONDE SE TENSA LA CONVERSACIÓN</p><h2>Los desacuerdos que importan</h2><div id="crux-content" class="muted">Aparecerán después de las posiciones iniciales.</div></section><section class="paper-card"><div class="card-heading"><h3>Bitácora del consejo</h3><span id="usage-display" class="muted"></span></div><div class="activity" id="activity" aria-live="polite"></div></section></div>
+        <section id="verdict-panel" hidden></section>
+      </section>
+    </main>
+  </div>
+  <dialog id="settings-dialog"><form id="settings-form"><div class="dialog-head"><div><p class="eyebrow">TU CONEXIÓN</p><h2>El motor detrás del debate.</h2></div><button class="icon-btn close-dialog" type="button" aria-label="Cerrar">×</button></div><p class="muted" id="settings-copy">Las llamadas salen desde el servidor al proveedor que elijas. La clave introducida aquí permanece sólo en memoria.</p><label for="provider">Proveedor</label><select id="provider"><option value="freellmapi">FreeLLMAPI</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option></select><label for="model">Modelo</label><input id="model" required maxlength="100" placeholder="ID del modelo habilitado en tu cuenta"><label for="api-key">API key</label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Introduce tu clave"><p class="field-help" id="settings-help">Deja vacío para conservar la clave de este proveedor ya cargada. Guardar la configuración no hace llamadas ni comprueba el saldo.</p><p id="settings-error" class="form-error" role="alert"></p><button class="primary-btn full-width" type="submit">Guardar conexión ↗</button></form></dialog>
+  <dialog id="advisor-dialog"><div class="dialog-head"><div><p class="eyebrow" id="advisor-kicker"></p><h2 id="advisor-name"></h2></div><button class="icon-btn close-dialog" type="button" aria-label="Cerrar">×</button></div><div id="advisor-detail"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/vendor/jspdf.umd.min.js" defer></script><script src="/app.js" type="module"></script>
+</body>
+</html>

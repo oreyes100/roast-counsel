@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+.deployment-access
+.claude/
+coverage/
+node_modules/
+data/sessions/*
+!data/sessions/.gitkeep
