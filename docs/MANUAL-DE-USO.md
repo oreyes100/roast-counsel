@@ -8,7 +8,7 @@ La web pública está disponible en https://roast.dineroorganizado.duckdns.org/ 
 
 El motor está conectado a https://freellm.dineroorganizado.duckdns.org con **modelo `auto`**. La aplicación envía `model: "auto"` y el gateway decide qué motor utilizar por solicitud. Los asesores comparten esa configuración; no tienen un modelo fijado por separado. La conexión de producción está administrada desde el servidor y bloqueada para cambios desde el navegador.
 
-**Límite pendiente:** el consejo sintético real más reciente llegó hasta la tercera ronda con siete llamadas y después el gateway respondió HTTP 502. No es una demo: se recibieron y validaron respuestas reales antes del fallo. No hay evidencia todavía de un consejo real completo con su informe final. El portal HTTPS funciona; la aceptación completa de IA queda pendiente.
+**Límite pendiente:** el consejo sintético real llegó hasta la tercera ronda y el gateway respondió HTTP 502 en la llamada 7. Se reanudó desde el checkpoint, guardó otro paso y la llamada 9 terminó con HTTP 504. No es una demo: se recibieron y validaron respuestas reales antes del fallo. No hay evidencia todavía de un consejo real completo con su informe final. El portal HTTPS funciona; la aceptación completa de IA queda pendiente.
 
 ## Qué se construyó
 
@@ -135,7 +135,7 @@ La línea `FREELLMAPI_API_KEY` ya existe en el archivo privado del servidor y de
 - Archivos JavaScript, CSS, icono, jsPDF y licencia accesibles con autenticación.
 - Renovación ACME por cron y recarga de Nginx configuradas.
 - Sitios principal de Dinero Organizado y FreeLLMAPI respondiendo 200 con HTTPS válido durante la comprobación.
-- Consejo real de prueba: respuestas validadas hasta tercera ronda, siete llamadas, detenido por HTTP 502. No completado.
+- Consejo real de prueba: llegó a tercera ronda; primer fallo HTTP 502 en la llamada 7. Reanudación desde checkpoint comprobada, con otro paso guardado; fallo posterior HTTP 504 en la llamada 9. No completado.
 
 No se cambió el NAT de pfSense ni la configuración de otros sitios. En la última conexión, el vhost y el certificado de Roast ya estaban instalados; se inspeccionaron y verificaron, sin atribuir su instalación a esta última intervención.
 

@@ -1,6 +1,6 @@
 # Release status · 2026-10-17
 
-Public HTTPS is **verified and operational**. Full live-AI acceptance remains **incomplete** after a gateway HTTP 502 during the third round. The hosted UI must not be described as an end-to-end approved AI council yet.
+Public HTTPS is **verified and operational**. Full live-AI acceptance remains **incomplete** after gateway HTTP 502/504 failures during the third round. The hosted UI must not be described as an end-to-end approved AI council yet.
 
 ## Completed
 
@@ -20,8 +20,8 @@ Public HTTPS is **verified and operational**. Full live-AI acceptance remains **
 
 ## Remaining gate
 
-The latest non-demo synthetic council used seven calls and failed in round three with HTTP 502 from the gateway. No completed real verdict or its exports have been verified. Earlier attempts also encountered provider 429/502/504 and demand/quota conditions. Resume the saved checkpoint when service availability recovers, within its bounded attempt budget, or start a new synthetic council after correcting the cause. Keep `auto`; do not substitute precalculated demo output for a real result.
+The non-demo synthetic council first failed in round three with HTTP 502 on call seven. A bounded manual resume recovered the pending step without repeating completed steps; a later call failed with HTTP 504 on call nine. No completed real verdict or its exports have been verified. Earlier attempts also encountered provider 429/502/504 and demand/quota conditions. Resume the saved checkpoint when service availability recovers, within its bounded attempt budget, or start a new synthetic council after correcting the cause. Keep `auto`; do not substitute precalculated demo output for a real result.
 
-A further gateway-log inspection was not executed because automatic approval review could not complete due to a usage limit. No new cause is inferred from logs that were not read.
+An initial gateway-log inspection was not executed because approval review could not complete. A later approved query returned filtered error counts including HTTP 503 availability/demand conditions. No secret values or unfiltered logs were printed.
 
 No recurring deployment or polling job was installed. Use the [usage manual](MANUAL-DE-USO.md) and [deployment instructions](DEPLOYMENT.md). Owner access credentials are kept only in a separate private handover excluded from Git.
