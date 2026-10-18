@@ -24,3 +24,7 @@ Verification gates:
 Rollback of this new installation: stop/disable `roast-counsel`, remove only its new Nginx vhost symlink, run `nginx -t`, then reload Nginx. Preserve private sessions and the environment file for recovery. For a later update, point `current` back to the previous recorded release and restart only this service. Never reset or delete unrelated sites.
 
 Private SSH topology, access passwords and API keys are deliberately excluded from this repository. Public HTTPS activation is complete only after the certificate and frontend routing gates pass; an internal healthy backend alone is not sufficient.
+
+## Gateway timeout chain
+
+FreeLLMAPI auto may retry a slower upstream before returning a non-streaming completion. The application uses one300-second deadline covering response headers and body; other provider adapters retain90 seconds. Both reverse-proxy hops in front of FreeLLMAPI must allow360-second read/send timeouts. A public60-second default aborts a valid in-flight generation and appears as canceled in gateway analytics. Keep a finite app deadline below proxy timeouts and preserve manual bounded recovery; an HTTP504 is not evidence of a missing API key or/v1 path. See [the timeout wargame](WARGAME-GATEWAY-TIMEOUT.md).

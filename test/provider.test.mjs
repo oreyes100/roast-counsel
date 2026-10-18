@@ -43,3 +43,41 @@ test('structured requests require the supplied schema instead of relying on JSON
     return Response.json({choices:[{message:{content:'{"ready":true}'},finish_reason:'stop'}]});
   }});await p.call({system:'JSON',prompt:'test',maxOutputTokens:1000,schema});
 });
+
+const gatewayConfig={provider:'freellmapi',baseURL:'https://gateway.example/v1',model:'auto',apiKey:'unified-secret'};
+const callInput={system:'JSON',prompt:'technical test',maxOutputTokens:1000};
+function rejectOnAbort(signal) {
+  return new Promise((_resolve,reject)=>{
+    const guard=setTimeout(()=>reject(new Error('Abort was not propagated')),1000);
+    const abort=()=>{clearTimeout(guard);reject(signal.reason);};
+    if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
+  });
+}
+test('auto gateway has room for fallback while other providers retain their deadline',async()=>{
+  assert.equal(new Provider(gatewayConfig).requestTimeoutMs,300000);
+  assert.equal(new Provider({provider:'openai'}).requestTimeoutMs,90000);
+  const p=new Provider(gatewayConfig,{requestTimeoutMs:200,fetchFn:async(_url,{signal,body})=>{
+    await new Promise(r=>setTimeout(r,40));assert.equal(signal.aborted,false);assert.equal(JSON.parse(body).model,'auto');
+    return Response.json({choices:[{message:{content:'{"ready":true}'},finish_reason:'stop'}]});
+  }});
+  assert.equal((await p.call(callInput)).raw,'{"ready":true}');
+});
+test('a stalled gateway before headers is aborted with a bounded timeout',async()=>{
+  const p=new Provider(gatewayConfig,{requestTimeoutMs:20,fetchFn:async(_url,{signal})=>rejectOnAbort(signal)});
+  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT'&&e.status===504);
+});
+test('deadline also covers a stalled response body after successful headers',async()=>{
+  const p=new Provider(gatewayConfig,{requestTimeoutMs:20,fetchFn:async(_url,{signal})=>({ok:true,json:()=>rejectOnAbort(signal)})});
+  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT');
+});
+test('owner cancellation during body reading is preserved as cancellation',async()=>{
+  const owner=new AbortController();
+  const p=new Provider(gatewayConfig,{requestTimeoutMs:500,fetchFn:async(_url,{signal})=>{
+    setTimeout(()=>owner.abort(),10);return {ok:true,json:()=>rejectOnAbort(signal)};
+  }});
+  await assert.rejects(p.call({...callInput,signal:owner.signal}),e=>e.code==='CANCELLED'&&e.status===409);
+});
+test('a gateway504 explains timeout and checkpoint recovery without leaking its body',async()=>{
+  const p=new Provider(gatewayConfig,{fetchFn:async()=>new Response('unified-secret private brief',{status:504})});
+  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_HTTP'&&e.message.includes('504')&&e.message.includes('tiempo de espera')&&!e.message.includes('unified-secret')&&!e.message.includes('private brief'));
+});
