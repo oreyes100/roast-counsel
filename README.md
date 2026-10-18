@@ -2,6 +2,8 @@
 
 Webapp en español para someter una decisión a distintas perspectivas, debatir escenarios y producir una resolución con condiciones, disenso y próximos pasos. Reutiliza los siete packs de conocimiento y retratos de [nateherkai/roast-room](https://github.com/nateherkai/roast-room/tree/f5e7b631a172ecc8ef5488760654ad37f24204b0); el servidor, la interfaz y el motor de validación de esta adaptación están en esta carpeta.
 
+La web alojada está en https://roast.dineroorganizado.duckdns.org/ y requiere las credenciales del propietario. Consulta el [manual de uso](docs/MANUAL-DE-USO.md) y el [estado verificado de la entrega](docs/RELEASE-STATUS.md).
+
 ## Ejecutar
 
 Requiere Node.js 20 o superior. No necesita instalar dependencias.

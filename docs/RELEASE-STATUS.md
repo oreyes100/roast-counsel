@@ -1,24 +1,27 @@
 # Release status · 2026-10-17
 
-Overall: **BLOCKED for public HTTPS acceptance**. The application backend and published source are ready; the public routing and sustained real-model workflow have not passed all release gates.
+Public HTTPS is **verified and operational**. Full live-AI acceptance remains **incomplete** after a gateway HTTP 502 during the third round. The hosted UI must not be described as an end-to-end approved AI council yet.
 
 ## Completed
 
 - Source published to `oreyes100/roast-counsel`, branch `main`.
-- Application revision `5e08c50917c5550e601096fe26cdd7e68a047572` installed as a dedicated systemd service with external private state.
-- Node v22.23.2 on the application host; all 33 tests pass there and locally.
-- `/health` returns `{"status":"ok","version":"0.2.0"}`. The service is active and bound only to loopback.
-- Nginx configuration validates. Its application vhost returns 401 anonymously and 200 with the owner's dedicated web credentials.
-- Authenticated bootstrap selects managed FreeLLMAPI with model `auto`; the unified key is never returned.
-- FreeLLMAPI CLI 0.8.1 `setup-claude` completed in a separate `roast-counsel` profile.
-- The authenticated gateway model catalog and a minimal real JSON-generation probe succeeded.
-- Strict output schemas now define required fields, closed risk enums and the different confidence/score ranges. Invalid outputs remain rejected; the checks were not relaxed to pass a model response.
+- Application revision `5e08c50917c5550e601096fe26cdd7e68a047572` installed as a dedicated systemd service with private external state.
+- Node v22.23.2 on the application host; all 33 tests pass there and locally for the deployed source revision.
+- Service health is correct and its Node listener remains bound only to loopback.
+- Public `https://roast.dineroorganizado.duckdns.org/` validates with strict TLS. Anonymous requests return 401; authenticated HTML and bootstrap return 200.
+- The certificate covers the exact hostname and expires on 2027-01-15 at 23:35:31 UTC. ACME renewal cron and Nginx reload hook are configured.
+- Authenticated JavaScript, CSS, icon, jsPDF and attribution assets return 200.
+- Bootstrap selects managed FreeLLMAPI/model `auto`; the unified key is never returned. The gateway chooses the underlying model per request.
+- FreeLLMAPI CLI 0.8.1 setup completed in the separate `roast-counsel` Claude profile, now also using `auto`.
+- A minimal real JSON-generation probe succeeded. The latest public synthetic council produced validated real responses through the first two rounds and draft, before failing in round three.
+- Existing main-site and FreeLLMAPI HTTPS checks returned 200. Existing NAT and unrelated sites were preserved.
+- Proxy access was verified using the operator's supplied connection guide and host fingerprints. The working route uses an existing key on the application VM. The vhost and valid certificate were already present at that point; this continuation verified them without modifying the proxy configuration.
 - No API key, web password, SSH password or session state was committed.
 
-## Remaining gates
+## Remaining gate
 
-The public hostname is not activated on the actual HTTPS frontend. Its current default TLS response is not an acceptable certificate for this release. Administrative access to that frontend is required to add the dedicated vhost and valid certificate; application-host access alone does not authorize a claim that public HTTPS works. Existing NAT and unrelated websites were preserved. The owner’s infrastructure manuals were reviewed: they specify root SSH access with an operator key, rather than the application VM account. The available local/operator-VM keys and the documented hypervisor access were rejected. No key checks were disabled and no firewall rules were changed; a working authorized proxy key is still needed.
+The latest non-demo synthetic council used seven calls and failed in round three with HTTP 502 from the gateway. No completed real verdict or its exports have been verified. Earlier attempts also encountered provider 429/502/504 and demand/quota conditions. Resume the saved checkpoint when service availability recovers, within its bounded attempt budget, or start a new synthetic council after correcting the cause. Keep `auto`; do not substitute precalculated demo output for a real result.
 
-The full synthetic live council did not complete. Its requests exposed provider responses including HTTP 429, 502 and 504; gateway logs also reported Google 503 demand failures and exhausted daily free-model limits on another provider. A successful minimal probe does not establish sustained availability. Retry the synthetic council after upstream availability/quota recovers, without presenting the precalculated demo as AI output.
+A further gateway-log inspection was not executed because automatic approval review could not complete due to a usage limit. No new cause is inferred from logs that were not read.
 
-No automatic recurring deployment or polling job was installed. Retain the documented rollback and private access configuration while the remaining gates are resolved.
+No recurring deployment or polling job was installed. Use the [usage manual](MANUAL-DE-USO.md) and [deployment instructions](DEPLOYMENT.md). Owner access credentials are kept only in a separate private handover excluded from Git.

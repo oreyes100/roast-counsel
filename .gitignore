@@ -9,3 +9,5 @@ data/sessions/*
 !data/sessions/.gitkeep
 
 .enable-proxy-access.sh
+
+ENTREGA-Y-USO-PRIVADO.md
