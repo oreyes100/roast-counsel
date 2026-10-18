@@ -1,27 +1,22 @@
 # Release status · 2026-10-17
 
-Public HTTPS is **verified and operational**. Full live-AI acceptance remains **incomplete** after gateway HTTP 502/504 failures during the third round. The hosted UI must not be described as an end-to-end approved AI council yet.
+**Verified:** public HTTPS, authentication, managed FreeLLMAPI `auto`, checkpoint recovery, a completed real synthetic council and real Markdown/JSON exports. The observed gateway60-second cancellation fault has been corrected.
 
-## Completed
+## Deployed correction
 
-- Source published to `oreyes100/roast-counsel`, branch `main`.
-- Application revision `5e08c50917c5550e601096fe26cdd7e68a047572` installed as a dedicated systemd service with private external state.
-- Node v22.23.2 on the application host; all 33 tests pass there and locally for the deployed source revision.
-- Service health is correct and its Node listener remains bound only to loopback.
-- Public `https://roast.dineroorganizado.duckdns.org/` validates with strict TLS. Anonymous requests return 401; authenticated HTML and bootstrap return 200.
-- The certificate covers the exact hostname and expires on 2027-01-15 at 23:35:31 UTC. ACME renewal cron and Nginx reload hook are configured.
-- Authenticated JavaScript, CSS, icon, jsPDF and attribution assets return 200.
-- Bootstrap selects managed FreeLLMAPI/model `auto`; the unified key is never returned. The gateway chooses the underlying model per request.
-- FreeLLMAPI CLI 0.8.1 setup completed in the separate `roast-counsel` Claude profile, now also using `auto`.
-- A minimal real JSON-generation probe succeeded. The latest public synthetic council produced validated real responses through the first two rounds and draft, before failing in round three.
-- Existing main-site and FreeLLMAPI HTTPS checks returned 200. Existing NAT and unrelated sites were preserved.
-- Proxy access was verified using the operator's supplied connection guide and host fingerprints. The working route uses an existing key on the application VM. The vhost and valid certificate were already present at that point; this continuation verified them without modifying the proxy configuration.
-- No API key, web password, SSH password or session state was committed.
+Application revision `840056f00eee0fc77d3e6be9af2ec789056d479d` is active. Its FreeLLMAPI deadline is300 seconds across headers and body; other providers retain90 seconds. Both Nginx hops serving FreeLLMAPI now allow360-second read/send timeouts. Each configuration was backed up and passed nginx-t before reload. Existing NAT, unrelated vhosts, gateway keys and auto routing were preserved. The previous application release remains available for rollback.
 
-## Remaining gate
+The old public gateway timeout was60 seconds. Its error logs matched the canceled requests in the owner's analytics. Requests were reaching the gateway; changing credentials or duplicating the/v1 prefix was not the fix. The app already sends authenticated requests to/v1/chat/completions with modelauto.
 
-The non-demo synthetic council first failed in round three with HTTP 502 on call seven. A bounded manual resume recovered the pending step without repeating completed steps; a later call failed with HTTP 504 on call nine. No completed real verdict or its exports have been verified. Earlier attempts also encountered provider 429/502/504 and demand/quota conditions. Resume the saved checkpoint when service availability recovers, within its bounded attempt budget, or start a new synthetic council after correcting the cause. Keep `auto`; do not substitute precalculated demo output for a real result.
+## Verification
 
-An initial gateway-log inspection was not executed because approval review could not complete. A later approved query returned filtered error counts including HTTP 503 availability/demand conditions. No secret values or unfiltered logs were printed.
+- 38/38 tests passed locally and on the VPS under the service user, including stalled headers/body, explicit cancellation and safe504 messaging.
+- Service health and loopback listener remain correct; no owner council was active when the service switched releases.
+- Authenticated public HTML/bootstrap return200; managed provider/model remain freellmapi/auto and the key is not returned. Anonymous API access returns401.
+- The existing non-demo synthetic council resumed from its saved pending vote and completed in11 total calls, including two earlier failed calls. All9 expected results are saved.
+- Actual JSON export confirms COMPLETE/demo=false/modelauto. Markdown and JSON exports return200; no gateway key is present in either.
+- Main-site and FreeLLMAPI public HTTPS checks remain200 with valid certificates. The Roast certificate and ACME renewal configuration remain valid.
 
-No recurring deployment or polling job was installed. Use the [usage manual](MANUAL-DE-USO.md) and [deployment instructions](DEPLOYMENT.md). Owner access credentials are kept only in a separate private handover excluded from Git.
+The final two calls completed in approximately46 seconds combined; this successful run did not itself require a single response longer than the former60-second cutoff. The longer limits are verified from configuration and bounded-timeout regression tests. No claim is made that upstream providers can never fail.
+
+See the [timeout wargame](WARGAME-GATEWAY-TIMEOUT.md), [usage manual](MANUAL-DE-USO.md) and [deployment instructions](DEPLOYMENT.md). Credentials and private operational backups are excluded from Git. No recurring deployment or polling job was installed.

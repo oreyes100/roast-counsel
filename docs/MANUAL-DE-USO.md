@@ -8,7 +8,7 @@ La web pública está disponible en https://roast.dineroorganizado.duckdns.org/ 
 
 El motor está conectado a https://freellm.dineroorganizado.duckdns.org con **modelo `auto`**. La aplicación envía `model: "auto"` y el gateway decide qué motor utilizar por solicitud. Los asesores comparten esa configuración; no tienen un modelo fijado por separado. La conexión de producción está administrada desde el servidor y bloqueada para cambios desde el navegador.
 
-**Límite pendiente:** el consejo sintético real llegó hasta la tercera ronda y el gateway respondió HTTP 502 en la llamada 7. Se reanudó desde el checkpoint, guardó otro paso y la llamada 9 terminó con HTTP 504. No es una demo: se recibieron y validaron respuestas reales antes del fallo. No hay evidencia todavía de un consejo real completo con su informe final. El portal HTTPS funciona; la aceptación completa de IA queda pendiente.
+**Verificación real completada:** se corrigió un corte de Nginx a los 60 segundos y el límite de 90 segundos del cliente. FreeLLMAPI dispone ahora de 300 segundos por llamada en la app y 360 segundos en ambos proxies. La sesión sintética se reanudó desde su checkpoint y completó el consejo con `auto`, sin demo; se verificaron sus exportaciones Markdown y JSON. Sus 11 llamadas totales incluyen los dos fallos históricos previos al arreglo. Esto prueba el caso corregido; la disponibilidad futura sigue dependiendo de los proveedores.
 
 ## Qué se construyó
 
@@ -128,16 +128,16 @@ La línea `FREELLMAPI_API_KEY` ya existe en el archivo privado del servidor y de
 
 ## Verificaciones realizadas
 
-- 33 pruebas locales y 33 pruebas en el VPS aprobadas para la revisión de código desplegada.
+- 38 pruebas locales y 38 pruebas en el VPS aprobadas para la revisión de código desplegada.
 - Servicio activo, `/health` correcto y Node limitado a loopback.
 - HTTPS público con el certificado del nombre correcto, válido hasta el 15 de enero de 2027 (fecha UTC).
 - Petición anónima: 401; HTML y bootstrap autenticados: 200; FreeLLMAPI/modelo auto y clave oculta.
 - Archivos JavaScript, CSS, icono, jsPDF y licencia accesibles con autenticación.
 - Renovación ACME por cron y recarga de Nginx configuradas.
 - Sitios principal de Dinero Organizado y FreeLLMAPI respondiendo 200 con HTTPS válido durante la comprobación.
-- Consejo real de prueba: llegó a tercera ronda; primer fallo HTTP 502 en la llamada 7. Reanudación desde checkpoint comprobada, con otro paso guardado; fallo posterior HTTP 504 en la llamada 9. No completado.
+- Consejo real de prueba completado tras corregir timeouts y reanudar: 11 llamadas totales, 9 pasos validados, estado COMPLETE, demo=false y exportaciones Markdown/JSON con HTTP 200. Los fallos de las llamadas 7 y 9 permanecen en la bitácora histórica.
 
-No se cambió el NAT de pfSense ni la configuración de otros sitios. En la última conexión, el vhost y el certificado de Roast ya estaban instalados; se inspeccionaron y verificaron, sin atribuir su instalación a esta última intervención.
+No se cambió el NAT de pfSense ni la configuración de otros sitios. El vhost y el certificado de Roast ya estaban instalados cuando se consiguió acceso. Después se modificaron únicamente los timeouts de los dos vhosts de FreeLLMAPI, con respaldos y nginx -t antes de cada recarga.
 
 ## Código y versiones
 
@@ -148,4 +148,8 @@ Repositorio: https://github.com/oreyes100/roast-counsel
 - `5e08c509`: escalas numéricas y riesgos explícitos; revisión de aplicación desplegada.
 - `14a3674` y `837106a`: documentación del estado y accesos verificados antes de resolverse HTTPS.
 
-La revisión de aplicación en ejecución es `5e08c50917c5550e601096fe26cdd7e68a047572`; commits posteriores de documentación no implican cambio de servicio. No hay despliegue automático recurrente instalado.
+La revisión de aplicación en ejecución es `840056f00eee0fc77d3e6be9af2ec789056d479d`: timeout FreeLLMAPI de 300 segundos, manejo de cancelación durante lectura y cinco pruebas adicionales. La revisión anterior `5e08c509` se conserva para rollback; commits posteriores de documentación no implican cambio de servicio. No hay despliegue automático recurrente instalado.
+
+## Tras un error antiguo de timeout
+
+Recarga la web y abre la sesión fallida desde el historial. Usa **Reanudar** si el paso conserva intentos disponibles; no se repiten los resultados ya guardados. Si ese paso ya agotó sus dos intentos, crea un consejo nuevo. El arreglo no borra errores históricos ni reinicia los contadores de llamadas. Un HTTP 504 futuro puede ser una incidencia real del proveedor, pero el proxy ya no corta a los 60 segundos.

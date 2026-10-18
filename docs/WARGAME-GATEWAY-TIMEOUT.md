@@ -26,5 +26,5 @@ Execution log:
 - [x] Production identities and timeout chain verified before edits.
 - [x] Regression and full tests pass:38/38. The first sandboxed full run could not bind loopback; the authorized run passed all HTTP tests.
 - [x] Both proxy read/send timeouts360s validated and reloaded with private backups; no unrelated vhost edits.
-- [ ] New application release healthy and authenticated public checks pass.
-- [ ] Actual complete council and exports verified.
+- [x] Release840056f0 active, previous5e08c509 retained, no active owner council interrupted; health/authenticated bootstrap and existing sites pass.
+- [x] Actual non-demo council resumed and completed with auto:11 total calls including2 historical failures;9 saved results; real Markdown/JSON exports200. Final two calls together took about46s, so no individual post-fix request longer than60s was observed in this run.
