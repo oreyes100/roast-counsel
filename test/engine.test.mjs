@@ -55,6 +55,20 @@ test('transient provider failures do not permanently lock a step; the session ca
   await bounded.engine.start(bounded.s,bounded.config);
   assert.equal(bounded.s.status,'BUDGET_EXCEEDED');assert.equal(bounded.s.usage.calls,1);assert.equal(bounded.calls.length,1);
 });
+test('retryable gateway errors get two counted retries before the same session fails recoverably',async t=>{
+  let failures=3;
+  const f=fixture(t,{fail({step}){if(step==='round1/graham'&&failures>0){failures--;const e=new AppError('Temporal','PROVIDER_HTTP',502);e.retryable=true;e.upstreamStatus=503;throw e;}}});
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.attempts['round1/graham'],3);
+  assert.equal(f.s.usage.calls,3);assert.equal(f.calls.filter(c=>c.step==='round1/graham').length,3);
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'COMPLETE');assert.equal(f.s.usage.calls,18);
+  assert.equal(f.calls.filter(c=>c.step==='round1/graham').length,4);
+  assert.equal(f.s.events.filter(e=>e.type==='retry'&&e.step==='round1/graham').length,2);
+});
+test('canceling during retry backoff pauses the session without dispatching another request',async t=>{
+  const f=fixture(t,{retryDelaysMs:[1000,1000],fail(){const e=new AppError('Temporal','PROVIDER_HTTP',502);e.retryable=true;e.upstreamStatus=503;throw e;}});
+  const done=f.engine.start(f.s,f.config);setTimeout(()=>f.engine.cancel(f.s.id),10);await done;
+  assert.equal(f.s.status,'PAUSED');assert.equal(f.s.usage.calls,1);assert.equal(f.calls.length,1);
+});
 test('stopping aborts the run before completion; second simultaneous run is rejected',async t=>{
   const f=fixture(t);const done=f.engine.start(f.s,f.config);
   assert.throws(()=>f.engine.start(f.s,f.config),/curso/);f.engine.cancel(f.s.id);await done;

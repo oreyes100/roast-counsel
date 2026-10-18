@@ -64,11 +64,11 @@ test('auto gateway has room for fallback while other providers retain their dead
 });
 test('a stalled gateway before headers is aborted with a bounded timeout',async()=>{
   const p=new Provider(gatewayConfig,{requestTimeoutMs:20,fetchFn:async(_url,{signal})=>rejectOnAbort(signal)});
-  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT'&&e.status===504);
+  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT'&&e.status===504&&e.retryable&&e.upstreamStatus===504);
 });
 test('deadline also covers a stalled response body after successful headers',async()=>{
   const p=new Provider(gatewayConfig,{requestTimeoutMs:20,fetchFn:async(_url,{signal})=>({ok:true,json:()=>rejectOnAbort(signal)})});
-  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT');
+  await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_TIMEOUT'&&e.retryable);
 });
 test('owner cancellation during body reading is preserved as cancellation',async()=>{
   const owner=new AbortController();
@@ -84,6 +84,6 @@ test('a gateway504 explains timeout and checkpoint recovery without leaking its 
 test('gateway502 and503 identify temporary route unavailability without exposing provider details',async()=>{
   for(const status of [502,503]) {
     const p=new Provider(gatewayConfig,{fetchFn:async()=>new Response('unified-secret private brief',{status})});
-    await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_HTTP'&&e.message.includes(String(status))&&e.message.includes('ruta disponible')&&!e.message.includes('unified-secret')&&!e.message.includes('private brief'));
+    await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_HTTP'&&e.retryable&&e.upstreamStatus===status&&e.message.includes(String(status))&&e.message.includes('ruta disponible')&&!e.message.includes('unified-secret')&&!e.message.includes('private brief'));
   }
 });
