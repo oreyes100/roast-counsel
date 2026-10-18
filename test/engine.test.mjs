@@ -42,6 +42,19 @@ test('provider failure can resume without repeating completed calls; restart pau
   const other=f.store.create(f.s.brief,f.config,f.knowledge);other.status='RUNNING';f.store.save(other);
   const restored=new Store(f.dir);assert.equal(restored.get(other.id).status,'PAUSED');
 });
+test('transient provider failures do not permanently lock a step; the session call cap stays binding',async t=>{
+  let failures=2;
+  const f=fixture(t,{fail({step}){if(step==='round1/graham'&&failures>0){failures--;throw new AppError('Temporal','PROVIDER_HTTP',502);}}});
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.attempts['round1/graham'],1);
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.attempts['round1/graham'],2);
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'COMPLETE');assert.equal(f.s.attempts['round1/graham'],3);
+  assert.equal(f.calls.filter(c=>c.step==='round1/graham').length,3);assert.equal(f.s.usage.calls,17);
+
+  const bounded=fixture(t,{fail(){throw new AppError('Temporal','PROVIDER_HTTP',502);}});
+  bounded.s.brief.maxCalls=1;await bounded.engine.start(bounded.s,bounded.config);
+  await bounded.engine.start(bounded.s,bounded.config);
+  assert.equal(bounded.s.status,'BUDGET_EXCEEDED');assert.equal(bounded.s.usage.calls,1);assert.equal(bounded.calls.length,1);
+});
 test('stopping aborts the run before completion; second simultaneous run is rejected',async t=>{
   const f=fixture(t);const done=f.engine.start(f.s,f.config);
   assert.throws(()=>f.engine.start(f.s,f.config),/curso/);f.engine.cancel(f.s.id);await done;

@@ -41,7 +41,7 @@ Las enmiendas se registran para una nueva resolución; no se adoptan silenciosam
 
 ## Límites y recuperación
 
-Cada sesión tiene un máximo de llamadas y un máximo de tokens por respuesta. Se reserva y guarda cada intento antes de enviarlo. Hay como máximo dos intentos por paso, incluyendo reanudaciones. Un error de formato permite un intento de reparación; los fallos HTTP requieren reanudar manualmente. No se repiten pasos completados. Al agotar ambos intentos, crea una nueva sesión con el brief o configuración corregidos.
+Cada sesión tiene un máximo total de llamadas y un máximo de tokens por respuesta. Se reserva y guarda cada llamada antes de enviarla. Un error de formato permite un intento de reparación durante esa ejecución; un fallo temporal del proveedor conserva el paso para reanudar la misma sesión. Las reanudaciones siguen sujetas al máximo total de llamadas, no repiten pasos completados y no requieren crear otro brief. Los errores 502/503/504 identifican la indisponibilidad o el timeout del gateway sin mostrar su respuesta interna.
 
 La app permite un consejo activo a la vez. Detener aborta la solicitud activa y conserva el progreso. Una llamada abortada o fallida puede haber sido cobrada sin devolver uso. Los tokens mostrados son los reportados por respuestas recibidas, no un estado de cuenta. El límite de llamadas no es un presupuesto monetario; revisa tarifas y límites en tu cuenta.
 

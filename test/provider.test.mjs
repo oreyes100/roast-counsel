@@ -81,3 +81,9 @@ test('a gateway504 explains timeout and checkpoint recovery without leaking its 
   const p=new Provider(gatewayConfig,{fetchFn:async()=>new Response('unified-secret private brief',{status:504})});
   await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_HTTP'&&e.message.includes('504')&&e.message.includes('tiempo de espera')&&!e.message.includes('unified-secret')&&!e.message.includes('private brief'));
 });
+test('gateway502 and503 identify temporary route unavailability without exposing provider details',async()=>{
+  for(const status of [502,503]) {
+    const p=new Provider(gatewayConfig,{fetchFn:async()=>new Response('unified-secret private brief',{status})});
+    await assert.rejects(p.call(callInput),e=>e.code==='PROVIDER_HTTP'&&e.message.includes(String(status))&&e.message.includes('ruta disponible')&&!e.message.includes('unified-secret')&&!e.message.includes('private brief'));
+  }
+});

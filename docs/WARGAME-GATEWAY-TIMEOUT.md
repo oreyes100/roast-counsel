@@ -4,7 +4,7 @@ Mission: let managed FreeLLMAPI `auto` complete a bounded slow request and finis
 
 Evidence before changes: public gateway Nginx read timeout60s; internal gateway read/send timeout300s; app provider deadline90s. Recent public Nginx errors confirm upstream timeouts at00:01:40,01:40:31,01:50:22 UTC2026-10-18. Gateway analytics supplied by the owner record canceled requests at59954/59997ms. Those requests reached the gateway; a missing `/v1` prefix or absent authentication does not explain these cancellations. The app already posts to `/v1/chat/completions` with modelauto and a Bearer unified key.
 
-Scope: FreeLLMAPI client deadline and its two Nginx hops only; preserve managed auto, credentials, existing sites, sessions, validation rules and bounded attempts. Do not replace real results with a demo or retry generation without counting it.
+Scope: FreeLLMAPI client deadline and its two Nginx hops, plus safe recovery from transient upstream errors; preserve managed auto, credentials, existing sites, session data and validation rules. Do not replace real results with a demo or retry generation without counting it.
 
 | Scenario | Expected result |
 |---|---|
@@ -15,7 +15,7 @@ Scope: FreeLLMAPI client deadline and its two Nginx hops only; preserve managed 
 | Owner stops during fetch or body | Cancellation remains cancellation, not a model/JSON failure. |
 | Gateway returns504 | Safe specific timeout explanation; no provider body/key reflected. |
 | Client URL ends in/v1 | Exactly one/v1 prefix; modelauto/Bearer/schema unchanged. |
-| Resume old failed session | Completed steps remain saved and are not repeated; remaining attempts/call budget still enforced. |
+| Resume old failed session after two transient HTTP failures | The same step can run again without repeating completed work; every request consumes the session-wide call budget. |
 
 Gates: focused regression tests; full suite; staged-secret/diff review; nginx-t for each changed proxy before reload; service health and authenticated public bootstrap; slow generation beyond former60s cutoff when observable; complete actual non-demo council and real exports; existing site regression checks. Record unavailable provider capacity separately.
 
@@ -28,3 +28,4 @@ Execution log:
 - [x] Both proxy read/send timeouts360s validated and reloaded with private backups; no unrelated vhost edits.
 - [x] Release840056f0 active, previous5e08c509 retained, no active owner council interrupted; health/authenticated bootstrap and existing sites pass.
 - [x] Actual non-demo council resumed and completed with auto:11 total calls including2 historical failures;9 saved results; real Markdown/JSON exports200. Final two calls together took about46s, so no individual post-fix request longer than60s was observed in this run.
+- [ ] Regression: a failed step can be resumed after repeated transient 502/503/504 responses while the persisted `maxCalls` limit still blocks additional provider requests.
