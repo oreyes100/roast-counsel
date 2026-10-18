@@ -7,3 +7,5 @@ coverage/
 node_modules/
 data/sessions/*
 !data/sessions/.gitkeep
+
+.enable-proxy-access.sh

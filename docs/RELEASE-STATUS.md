@@ -17,7 +17,7 @@ Overall: **BLOCKED for public HTTPS acceptance**. The application backend and pu
 
 ## Remaining gates
 
-The public hostname is not activated on the actual HTTPS frontend. Its current default TLS response is not an acceptable certificate for this release. Administrative access to that frontend is required to add the dedicated vhost and valid certificate; application-host access alone does not authorize a claim that public HTTPS works. Existing NAT and unrelated websites were preserved.
+The public hostname is not activated on the actual HTTPS frontend. Its current default TLS response is not an acceptable certificate for this release. Administrative access to that frontend is required to add the dedicated vhost and valid certificate; application-host access alone does not authorize a claim that public HTTPS works. Existing NAT and unrelated websites were preserved. The owner’s infrastructure manuals were reviewed: they specify root SSH access with an operator key, rather than the application VM account. The available local/operator-VM keys and the documented hypervisor access were rejected. No key checks were disabled and no firewall rules were changed; a working authorized proxy key is still needed.
 
 The full synthetic live council did not complete. Its requests exposed provider responses including HTTP 429, 502 and 504; gateway logs also reported Google 503 demand failures and exhausted daily free-model limits on another provider. A successful minimal probe does not establish sustained availability. Retry the synthetic council after upstream availability/quota recovers, without presenting the precalculated demo as AI output.
 
