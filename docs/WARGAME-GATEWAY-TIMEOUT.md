@@ -15,6 +15,7 @@ Scope: FreeLLMAPI client deadline and its two Nginx hops, plus safe recovery fro
 | Owner stops during fetch or body | Cancellation remains cancellation, not a model/JSON failure. |
 | Gateway returns504 | Safe specific timeout explanation; no provider body/key reflected. |
 | Gateway/upstream returns502/503/504 or network timeout | Up to2 automatic retries after5/15s; each call consumes the session-wide limit, and manual resume remains available. |
+| Model returns a citation outside its voice pack or a false quote | Keep the citation gate; ask for up to2 corrected responses and explicitly permit `citations:[]`. |
 | Client URL ends in/v1 | Exactly one/v1 prefix; modelauto/Bearer/schema unchanged. |
 | Resume old failed session after two transient HTTP failures | The same step can run again without repeating completed work; every request consumes the session-wide call budget. |
 

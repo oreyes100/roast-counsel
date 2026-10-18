@@ -22,10 +22,17 @@ test('quick mode skips ratification with valid cards; no fake vote or support is
   assert.equal(f.s.status,'COMPLETE');assert(f.s.skippedRatification);assert.equal(f.calls.length,11);assert.equal(f.s.verdict.support,null);
   assert.equal(Object.keys(f.s.rounds[3]).length,0);assert(!fs.existsSync(path.join(f.dir,f.s.id,'draft.json')));
 });
-test('invalid model output repairs once, then blocks completion',async t=>{
+test('invalid model output repairs twice, then blocks completion',async t=>{
   const f=fixture(t,{mutate(v,{step}){if(step==='round1/graham')delete v.scores.B;}});
-  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.usage.calls,2);
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.usage.calls,3);
   assert(!fs.existsSync(path.join(f.dir,f.s.id,'verdict.json')));assert.deepEqual(f.s.rounds[1],{});
+});
+test('a false literal citation is re-asked and the voice may return no references',async t=>{
+  let inject=false;
+  const f=fixture(t,{mutate(v,{step}){if(step==='round1/graham'&&!inject){inject=true;v.citations=[{id:'S050',claim:'Claim without a matching literal passage.',quote:'This sentence does not occur in the attributed pack.'}];}}});
+  await f.engine.start(f.s,f.config);assert.equal(f.s.status,'COMPLETE');
+  assert.equal(f.s.rounds[1].graham.citations.length,0);
+  assert(f.s.events.some(e=>e.type==='validation'&&e.step==='round1/graham'));
 });
 test('call cap stops before dispatch and preserves checkpoints',async t=>{
   const f=fixture(t);f.s.brief.maxCalls=5;await f.engine.start(f.s,f.config);
