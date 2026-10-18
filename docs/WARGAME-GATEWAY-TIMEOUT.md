@@ -15,7 +15,7 @@ Scope: FreeLLMAPI client deadline and its two Nginx hops, plus safe recovery fro
 | Owner stops during fetch or body | Cancellation remains cancellation, not a model/JSON failure. |
 | Gateway returns504 | Safe specific timeout explanation; no provider body/key reflected. |
 | Gateway/upstream returns502/503/504 or network timeout | Up to2 automatic retries after5/15s; each call consumes the session-wide limit, and manual resume remains available. |
-| Model returns a citation outside its voice pack or a false quote | Keep the citation gate; ask for up to2 corrected responses and explicitly permit `citations:[]`. |
+| Model returns a false quote or a source outside its voice pack | Remove the unverified quote or omit the foreign source, record a visible warning, and keep the rest of the validated card. |
 | Client URL ends in/v1 | Exactly one/v1 prefix; modelauto/Bearer/schema unchanged. |
 | Resume old failed session after two transient HTTP failures | The same step can run again without repeating completed work; every request consumes the session-wide call budget. |
 
@@ -30,4 +30,4 @@ Execution log:
 - [x] Both proxy read/send timeouts360s validated and reloaded with private backups; no unrelated vhost edits.
 - [x] Release840056f0 active, previous5e08c509 retained, no active owner council interrupted; health/authenticated bootstrap and existing sites pass.
 - [x] Actual non-demo council resumed and completed with auto:11 total calls including2 historical failures;9 saved results; real Markdown/JSON exports200. Final two calls together took about46s, so no individual post-fix request longer than60s was observed in this run.
-- [ ] Regression: a failed step can be resumed after repeated transient 502/503/504 responses while the persisted `maxCalls` limit still blocks additional provider requests.
+- [x] Regression: a failed step can be resumed after repeated transient 502/503/504 responses while the persisted `maxCalls` limit still blocks additional provider requests; false literal quotes are removed and foreign-pack references are omitted with warnings.

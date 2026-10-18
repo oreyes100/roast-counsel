@@ -27,12 +27,17 @@ test('invalid model output repairs twice, then blocks completion',async t=>{
   await f.engine.start(f.s,f.config);assert.equal(f.s.status,'FAILED');assert.equal(f.s.usage.calls,3);
   assert(!fs.existsSync(path.join(f.dir,f.s.id,'verdict.json')));assert.deepEqual(f.s.rounds[1],{});
 });
-test('a false literal citation is re-asked and the voice may return no references',async t=>{
+test('a false literal quote is downgraded and a reference outside the voice pack is omitted',async t=>{
   let inject=false;
-  const f=fixture(t,{mutate(v,{step}){if(step==='round1/graham'&&!inject){inject=true;v.citations=[{id:'S050',claim:'Claim without a matching literal passage.',quote:'This sentence does not occur in the attributed pack.'}];}}});
+  const f=fixture(t,{mutate(v,{step}){if(step==='round1/graham'&&!inject){inject=true;const data=f.knowledge.get('graham'),sourceId=[...data.sources.keys()].find(id=>data.content.includes(id));v.citations=[
+    {id:sourceId,claim:'Claim without a matching literal passage.',quote:'This sentence does not occur in the attributed pack.'},
+    {id:'S999',claim:'This source belongs to no voice pack.',quote:''}
+  ];}}});
   await f.engine.start(f.s,f.config);assert.equal(f.s.status,'COMPLETE');
-  assert.equal(f.s.rounds[1].graham.citations.length,0);
-  assert(f.s.events.some(e=>e.type==='validation'&&e.step==='round1/graham'));
+  const [registered]=f.s.rounds[1].graham.citations;
+  assert.equal(f.s.rounds[1].graham.citations.length,1);assert.equal(registered.quote,'');assert.equal(registered.verification,'registered-reference');
+  assert.equal(f.s.rounds[1].graham.citationWarnings.length,2);assert.equal(f.s.usage.calls,15);
+  assert(f.s.events.some(e=>e.type==='citation'&&e.step==='round1/graham'));
 });
 test('call cap stops before dispatch and preserves checkpoints',async t=>{
   const f=fixture(t);f.s.brief.maxCalls=5;await f.engine.start(f.s,f.config);
