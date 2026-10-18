@@ -79,4 +79,6 @@ test('all model calls include typed output contracts and closed risk enums',asyn
   for(const schema of seen)assert.equal(schema.additionalProperties,false);
   assert.deepEqual(seen[0].properties.risks.properties.A.properties.ruin.enum,['none','possible','likely']);
   assert(seen[0].required.includes('citations'));
+  assert.equal(seen[0].properties.confidence.maximum,5);
+  assert.equal(seen[0].properties.scores.properties.A.maximum,10);
 });
